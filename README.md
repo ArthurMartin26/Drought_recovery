@@ -1,5 +1,3 @@
-# Drought_recovery
-Repo for MSc diss project #5 
 # Dissertation Proposal
 ## Learning Regional Adjustment to Drought Shocks Using Satellite Data
 
