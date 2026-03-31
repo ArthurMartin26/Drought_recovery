@@ -104,6 +104,13 @@ if (use_median50_rule) {
 # ----------------------------
 
 # Helper: find runs inside a logical vector
+# here we could have: FALSE FALSE TRUE TRUE TRUE FALSE TRUE TRUE
+#then we wuold get : 
+# FALSE length :2 
+# TRUE length :3 (start_idx= 3 end_idx =5)
+# FALSE lenght 1 
+# TRUE lenght 2 (start_idx = 7 end_idx =8)
+
 make_runs <- function(x) {
   r <- rle(x)
   ends <- cumsum(r$lengths)
@@ -151,19 +158,19 @@ for (cid in unique(dt$cell_id)) {
       ev <- sub[s_idx:e_idx]
       
       event_rows[[eid]] <- data.table(
-        event_id    = eid,
-        cell_id     = cid,
-        start_date  = min(ev$date),
-        end_date    = max(ev$date),
-        duration_m  = as.integer(max(ev$date) %/% months(1) - min(ev$date) %/% months(1) + 1),
-        min_rain_mm = min(ev$rain_mm, na.rm = TRUE),
-        mean_rain_mm= mean(ev$rain_mm, na.rm = TRUE),
-        min_z       = if (all(is.na(ev$rain_z))) NA_real_ else min(ev$rain_z, na.rm = TRUE),
-        mean_z      = if (all(is.na(ev$rain_z))) NA_real_ else mean(ev$rain_z, na.rm = TRUE),
-        cum_deficit = if (all(is.na(ev$rain_z))) NA_real_
+        event_id     = eid,
+        cell_id      = cid,
+        start_date   = min(ev$date),
+        end_date     = max(ev$date),
+        duration_m   = nrow(ev),
+        min_rain_mm  = min(ev$rain_mm, na.rm = TRUE),
+        mean_rain_mm = mean(ev$rain_mm, na.rm = TRUE),
+        min_z        = if (all(is.na(ev$rain_z))) NA_real_ else min(ev$rain_z, na.rm = TRUE),
+        mean_z       = if (all(is.na(ev$rain_z))) NA_real_ else mean(ev$rain_z, na.rm = TRUE),
+        cum_deficit  = if (all(is.na(ev$rain_z))) NA_real_
         else sum(pmin(ev$rain_z, 0), na.rm = TRUE),
-        lon         = ev$lon[1],
-        lat         = ev$lat[1]
+        lon          = ev$lon[1],
+        lat          = ev$lat[1]
       )
       
       last_end_date <- end_date
