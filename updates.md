@@ -1,5 +1,9 @@
 # Project Status: Drought Shock Construction (Work in Progress)
 
+## recent update 
+
+Baseline standardisation can be numerically unstable when baseline rainfall variability is near zero for particular grid‑cell × calendar‑month combinations. We therefore apply a two‑stage stabilisation rule: baselines with effectively zero variance are excluded from shock classification, and remaining low‑variance baselines are stabilised using a lower‑bound on the standard deviation based on the empirical distribution. This prevents implausible z‑scores while preserving genuine drought variation.
+
 ## Overview
 
 This repository contains work towards constructing a regional, grid‑cell–level dataset of drought shocks for Sub‑Saharan Africa, with a focus on Nigeria. The ultimate goal of the project is to study and predict regional post‑shock adjustment and recovery dynamics using satellite data and machine learning methods.
