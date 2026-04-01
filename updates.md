@@ -1,6 +1,10 @@
 # Drought Shock Construction (SPI‑3 style, hysteresis, contiguous events)
 
 ## recent changes 
+## update (01/apr) : 06 nigeria drought shock 
+
+This script aggregates the cell-level drought events constructed in Script 05 into Nigeria-wide drought episodes for descriptive analysis. Rather than treating droughts as grid-cell–specific phenomena, Script 06 links together all cell-level events that share the same start date and end date, which implies the same duration and the same set of calendar months. Each unique (start_date, end_date) window is treated as a single national drought episode, regardless of how many grid cells are affected. The script assigns a Nigeria-wide event identifier (ng_event_id), computes descriptive statistics on the spatial extent (number and share of grid cells affected) and severity (national minima and averages of SPI-based intensity), and produces summary tables and figures showing the frequency of drought episodes over time and their typical spatial coverage. This approach yields an interpretable count of seasonally defined, Nigeria-wide drought episodes, suitable for descriptive statistics and contextual analysis, while preserving the underlying cell-level information for traceability.
+
 ### Update (March 2026): Finalising drought event construction and stabilisation
 
 The drought construction pipeline has now been stabilised and validated. Monthly rainfall is aggregated into a 3‑month window (SPI‑3 style) and standardised relative to a 2000–2010 baseline by grid cell and calendar month. To ensure numerical stability and avoid artefacts from near‑zero baseline variance, the standardised anomaly is treated as a **bounded latent trigger index** rather than a literal Gaussian z‑score. Specifically, the index is capped at ±6 and used exclusively for drought entry/exit via hysteresis thresholds (enter = −1.0, exit = −0.5). This preserves the ordering and persistence of dry versus wet periods while preventing implausible tail values from driving event definitions.
