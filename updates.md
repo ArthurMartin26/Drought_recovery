@@ -1,7 +1,12 @@
 # Drought Shock Construction (SPI‑3 style, hysteresis, contiguous events)
 
 ## recent changes 
-Z3 is now bounded between +-6 to elimate crazy outliers 
+### Update (March 2026): Finalising drought event construction and stabilisation
+
+The drought construction pipeline has now been stabilised and validated. Monthly rainfall is aggregated into a 3‑month window (SPI‑3 style) and standardised relative to a 2000–2010 baseline by grid cell and calendar month. To ensure numerical stability and avoid artefacts from near‑zero baseline variance, the standardised anomaly is treated as a **bounded latent trigger index** rather than a literal Gaussian z‑score. Specifically, the index is capped at ±6 and used exclusively for drought entry/exit via hysteresis thresholds (enter = −1.0, exit = −0.5). This preserves the ordering and persistence of dry versus wet periods while preventing implausible tail values from driving event definitions.
+
+Calendar contiguity is enforced explicitly: drought runs are broken whenever months are not consecutive, and events are defined as contiguous drought regimes lasting at least three months. Event severity measures used downstream (e.g. minimum intensity and cumulative deficit) are computed from the bounded index to ensure robustness, while physical magnitudes (e.g. rainfall totals) are retained separately. Validation plots for sample grid cells confirm sensible temporal behaviour, stable hysteresis, and the absence of pathological spikes. At this point, drought events are considered final and suitable for downstream modelling of post‑shock adjustment and resilience.
+ 
 
 
 This folder constructs **finite drought shock events** from gridded monthly rainfall data using a **SPI‑3–style standardisation**, **hysteresis entry/exit rules**, and **calendar‑contiguous event definition**.
