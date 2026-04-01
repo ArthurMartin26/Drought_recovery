@@ -1,5 +1,9 @@
 # Drought Shock Construction (SPI‑3 style, hysteresis, contiguous events)
 
+## recent changes 
+Z3 is now bounded between +-6 to elimate crazy outliers 
+
+
 This folder constructs **finite drought shock events** from gridded monthly rainfall data using a **SPI‑3–style standardisation**, **hysteresis entry/exit rules**, and **calendar‑contiguous event definition**.
 
 The goal is to produce **credible, temporally finite rainfall shocks** suitable for downstream analysis of **post‑shock dynamics and recovery**, rather than raw climate anomalies.
