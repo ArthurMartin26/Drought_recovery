@@ -47,7 +47,7 @@ min_duration_months <- 3
 
 # Optional: minimum gap after an event before next event starts (same cell)
 # Set to 0 to disable
-spacing_months <- 0
+spacing_months <- 12
 
 # Validation: number of cells to inspect before scaling
 n_validate_cells <- 2
@@ -145,6 +145,15 @@ dt[!is.na(base3_sd_stab), base3_sd_stab := pmax(base3_sd_stab, sd_floor)]
 
 # Compute z3 using stabilised SD (z3 is NA where baseline is unreliable)
 dt[, z3 := (rain3 - base3_mean) / base3_sd_stab]
+
+## mention this 
+z_cap <- 6  # defensible bound for SPI-style indices
+
+dt[, z3_trigger := pmax(pmin(z3, z_cap), -z_cap)]
+
+# Intensity-safe version (bounded but explicitly named)
+dt[, z3_intensity := z3_trigger]
+
 # 1C) Hysteresis drought state (no events yet)
 hysteresis_state <- function(z, enter = -1, exit = -0.5) {
   n <- length(z)
@@ -171,7 +180,11 @@ hysteresis_state <- function(z, enter = -1, exit = -0.5) {
   state
 }
 
-dt[, drought_state := hysteresis_state(z3, enter = enter_thresh, exit = exit_thresh), by = cell_id]
+
+dt[, drought_state := hysteresis_state(z3_trigger,
+                                       enter = enter_thresh,
+                                       exit = exit_thresh),
+   by = cell_id]
 
 # ============================================================
 # PASS 2: Build contiguous drought runs (gap-aware)
@@ -201,9 +214,9 @@ run_stats <- dt[drought_state == TRUE,
                   # duration as number of months in the run (rows)
                   duration_m = .N,
                   
-                  min_z3     = min(z3, na.rm = TRUE),
-                  mean_z3    = mean(z3, na.rm = TRUE),
-                  cum_def3   = sum(pmin(z3, 0), na.rm = TRUE),
+                  min_z3     = min(z3_intensity, na.rm = TRUE),
+                  mean_z3    = mean(z3_intensity, na.rm = TRUE),
+                  cum_def3   = sum(pmin(z3_intensity, 0), na.rm = TRUE),
                   min_rain3  = min(rain3, na.rm = TRUE),
                   mean_rain3 = mean(rain3, na.rm = TRUE),
                   
@@ -261,7 +274,9 @@ months_out <- dt[, .(
   cell_id, year, month, date,
   lon = if (has_coords) lon else NA_real_,
   lat = if (has_coords) lat else NA_real_,
-  rain_mm, rain3, z3,
+  rain_mm, rain3,
+  z3_trigger,
+  z3_intensity,
   drought_state, event_id
 )]
 
@@ -329,10 +344,10 @@ if (length(cells_with_events) >= n_validate_cells) {
 val_dt <- months_out[cell_id %in% val_cells]
 
 # Simple validation printout (first 200 rows)
-print(val_dt[, .(cell_id, date, z3, drought_state, event_id)][order(cell_id, date)][1:200])
+print(val_dt[, .(cell_id, date, z3_trigger, drought_state, event_id)][order(cell_id, date)][1:200])
 
 # Plot z3 with drought_state shading
-p_val <- ggplot(val_dt, aes(x = date, y = z3)) +
+p_val <- ggplot(val_dt, aes(x = date, y = z3_trigger)) +
   geom_line(linewidth = 0.35) +
   geom_hline(yintercept = enter_thresh, linetype = "dashed", linewidth = 0.3) +
   geom_hline(yintercept = exit_thresh,  linetype = "dotted", linewidth = 0.3) +
