@@ -1,3 +1,8 @@
+# April 2026 – Design update:
+I now have monthly CHIRPS rainfall (2000–2024) and MODIS NDVI data aggregated to 10 km × 10 km grid cells for Nigeria, and have identified thousands of local, multi‑month drought events at the cell level. The empirical design is now event‑based, with each drought in each cell forming one observation. I distinguish between Zi, a fixed structural spatial fingerprint for each cell (e.g. geography, terrain, long‑run water presence, remoteness, land‑use structure), learned via a CNN from stacked raster layers, and Xi, event‑specific pre‑shock state variables (e.g. population, night‑time lights, cropland and irrigation shares, conflict exposure), constructed using rolling pre‑event averages to avoid post‑shock contamination. Post‑drought vegetation dynamics are classified into four adjustment regimes based on NDVI trajectories: rapid stabilisation (≤12 months), gradual stabilisation (≤24 months), delayed stabilisation (>24 months), and persistent structural shift (no return within the observation window). A gradient‑boosted decision tree model is used to predict these regimes from Zi, Xi, and drought severity, allowing the analysis to learn how structural spatial characteristics and evolving regional conditions interact to generate heterogeneous post‑drought adjustment paths.
+
+
+
 # Drought Shock Construction (SPI‑3 style, hysteresis, contiguous events)
 
 ## recent changes 
