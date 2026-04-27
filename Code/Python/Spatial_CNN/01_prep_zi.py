@@ -9,26 +9,6 @@ import numpy as np
 import rasterio
 from glob import glob
 
-def load_zi_stack(zi_dir):
-    zi_files = sorted(zi_dir.glob("*.tif"))
-
-    if len(zi_files) == 0:
-        raise FileNotFoundError(
-            f"No .tif files found in {zi_dir}"
-        )
-
-    arrays = []
-    meta = None
-
-    for f in zi_files:
-        with rasterio.open(f) as src:
-            arrays.append(src.read(1).astype("float32"))
-
-            if meta is None:
-                meta = src.meta
-
-    X = np.stack(arrays, axis=-1)
-    return X, zi_files, meta
 
 ZI_DIR = PROJECT_ROOT / "Data" / "Data_Output" / "Zi"
 print("Zi directory:", ZI_DIR)
@@ -93,7 +73,7 @@ def sample_patches_from_centres(
         if i + half > H or j + half > W:
             continue
 
-        patch_mask = mask[i-half:i+half, j-half:j+half]
+        patch_mask = mask[i-half:i+half, j-half:j+half]    # cell-validity mask
         if patch_mask.sum() < min_valid:
             continue
 
