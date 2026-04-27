@@ -25,3 +25,17 @@ dem_crop <- crop(dem, nga_country)
 dem_nga  <- mask(dem_crop, nga_country)
 plot(dem_nga)
 plot(nga_country, add = TRUE, border = "black", lwd = 2)
+
+png(
+  filename = "Outputs/Figures/srtm_dem_raw_global_extent.png",
+  width = 2000,
+  height = 1600,
+  res = 300
+)
+
+plot(
+  dem_nga,
+  main = "SRTM DEM (Nigeria)"
+)
+
+dev.off()

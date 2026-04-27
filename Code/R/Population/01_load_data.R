@@ -16,7 +16,22 @@ ext(r_count)
 plot(r_count)
 plot(r_density)
 # Extract raster values as a vector
-vals <- values(r)
+vals <- values(r_count)
 
 # Inspect vals 
 summary(vals)
+
+
+png(
+  filename = "Outputs/Figures/worldpop_population_count_nigeria_2000_1km.png",
+  width = 2000,
+  height = 1600,
+  res = 300
+)
+
+plot(
+  r_count,
+  main = "WorldPop Population Count (Nigeria, 2000; 1km)"
+)
+
+dev.off()

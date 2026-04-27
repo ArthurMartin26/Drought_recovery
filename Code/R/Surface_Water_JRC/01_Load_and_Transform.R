@@ -33,3 +33,18 @@ sw_crop <- crop(sw_vrt, nga)
 sw_nga <- mask(sw_crop, nga)
 
 plot(sw_nga)
+
+png(
+  filename = "Outputs/Figures/jrc_surface_water_occurrence_nigeria.png",
+  width = 2000,
+  height = 1600,
+  res = 300
+)
+
+plot(
+  sw_nga,
+  main = "JRC Global Surface Water Occurrence (1984–2021): Nigeria"
+)
+
+dev.off()
+

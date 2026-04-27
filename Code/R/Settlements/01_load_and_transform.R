@@ -24,3 +24,19 @@ cities_big <- project(cities_big, dem_nga)
 
 plot(cities_big)
 plot(cities_ng)
+
+png(
+  filename = "Outputs/Figures/natural_earth_populated_places_global.png",
+  width = 2000,
+  height = 1600,
+  res = 300
+)
+
+plot(
+  cities,
+  pch = 20,
+  col = "blue",
+  main = "Natural Earth Populated Places (Global)"
+)
+
+dev.off()
