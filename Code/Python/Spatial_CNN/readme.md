@@ -1,3 +1,63 @@
+## updated 
+
+# Spatial CNN (Zi) — README
+
+This folder contains the code to learn a compact “baseline place signature” (Zi) from stacked spatial rasters. The workflow is:
+
+1) build many local neighbourhood **patches** from aligned raster layers  
+2) train a model to **compress each patch into a small vector** (Zi) while still being able to roughly reconstruct the patch  
+3) apply the trained encoder to extract Zi vectors and save them with grid coordinates  
+4) plot Zi dimensions as maps and compare different model settings (e.g., Zi size 4 vs 8)
+
+The important mental model is:
+
+- The model learns to reconstruct the **patch**, not an individual cell.
+- Each centre cell (cell_i, cell_j) is assigned the Zi vector produced from the patch centred on that cell.
+- If latent_dim = K, you get **K separate Zi maps** (z_0 … z_(K-1)), one per dimension.
+
+---
+
+## What “patch”, “batch”, “gradient descent”, and “backprop” mean (in this project)
+
+### Patch (spatial concept)
+A **patch** is a small square cut-out of the raster grid around a location.  
+In this project the default is 12×12 grid cells. If your grid cells are ~10 km, a 12×12 patch represents roughly a 120 km × 120 km neighbourhood.
+
+Why patches exist: geography is spatial; a single cell is not enough context. A patch gives the model the “neighbourhood look” of a place.
+
+### Batch (computation concept)
+A **batch** is a group of patches processed together before updating the model (e.g., 64 patches at a time).  
+Batches exist for speed and stability: updating after one patch would be slow and noisy.
+
+### Backpropagation (where it happens)
+Backprop is triggered by:
+- `loss.backward()`
+
+This tells PyTorch to work out how each internal parameter contributed to the error.
+
+### Gradient descent (where it happens)
+Gradient descent happens when:
+- `optimizer.step()`
+
+This applies a small update to model parameters to reduce the loss next time.
+
+---
+
+## Repository / folder conventions
+
+Typical outputs created by this pipeline:
+
+- Trained model weights: `trained_zi_cnn.pt`  
+  (large binary artefact; should not be committed to git)
+- Embeddings: `zi_embeddings.csv` (or separate `zi_embeddings_4.csv`, `zi_embeddings_8.csv`)
+- Figures: `Outputs/Figures/CNN_4/`, `Outputs/Figures/CNN_8/`, and optional comparison folders
+
+
+
+
+=================================================================
+
+
 Spatial CNN – Learning Fixed Geographic Heterogeneity (Zi)
 Overview
 This folder contains the Python components of the dissertation codebase related to spatial representation learning. The purpose of this stage is to construct a low‑dimensional, spatially structured representation of time‑invariant geographic heterogeneity (Zi) using convolutional neural networks (CNNs).
@@ -136,3 +196,6 @@ The final output of this stage will be a dataset of the form:
 
 with one row per 10 km × 10 km grid cell in Nigeria.
 These Zi variables will then be merged into the downstream econometric analysis and treated as fixed pre‑treatment geographic heterogeneity.
+
+
+
