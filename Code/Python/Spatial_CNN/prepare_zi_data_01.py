@@ -1,11 +1,8 @@
 # ======================================================
-# prepare_zi_data.py
-# Build spatial Zi patches for CNN representation learning
+# 01_prepare_zi_data.py
+# Load and preprocess Zi rasters into patch dataset
 # ======================================================
 
-# ------------------
-# Imports
-# ------------------
 from pathlib import Path
 import numpy as np
 import rasterio
@@ -19,6 +16,7 @@ from torch.utils.data import Dataset
 # ------------------
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 ZI_DIR = PROJECT_ROOT / "Data" / "Data_Output" / "Zi"
+OUTPUT_DIR = PROJECT_ROOT / "Data" / "Data_Output"
 
 
 # ------------------
@@ -50,6 +48,10 @@ def read_and_align(path, ref_meta):
 def load_zi_stack(zi_dir):
     """
     Load and align all Zi rasters onto a common grid.
+    Returns:
+        X: numpy array of shape (H, W, C)
+        zi_files: list of file paths
+        ref_meta: rasterio metadata dict
     """
     zi_files = sorted(zi_dir.glob("zi_*.tif"))
 
@@ -95,6 +97,8 @@ def standardise_channels(X, mask):
 
     for c in range(C):
         vals = X[..., c][mask]
+        # Filter out NaN values before computing statistics
+        vals = vals[np.isfinite(vals)]
         mu = vals.mean()
         sd = vals.std()
 
@@ -168,17 +172,37 @@ class ZiPatchDataset(Dataset):
 
 
 # ------------------
-# Public builder function
+# Main preparation function
 # ------------------
-def build_zi_dataset(
+def prepare_zi_data(
     patch_size=12,
     n_samples=3000,
-    min_valid_frac=0.4
+    min_valid_frac=0.4,
+    save_patches=True
 ):
+    """
+    Load Zi rasters, standardize, sample patches, and optionally save.
+    
+    Returns:
+        dataset: PyTorch Dataset of shape (N, C, H, W)
+        centres: list of (i, j) coordinates for each patch
+        meta: rasterio metadata
+        stats: dict of channel statistics
+        X: full standardized array (H, W, C)
+    """
+    print("Loading Zi rasters...")
     X, zi_files, meta = load_zi_stack(ZI_DIR)
-    mask = get_valid_mask(X)
-    X_std, stats = standardise_channels(X, mask)
+    print(f"  Loaded {len(zi_files)} files, shape: {X.shape}")
 
+    print("Computing valid mask...")
+    mask = get_valid_mask(X)
+    print(f"  Valid cells: {mask.sum()} / {mask.size}")
+
+    print("Standardizing channels...")
+    X_std, stats = standardise_channels(X, mask)
+    print(f"  Standardized range: [{X_std.min():.2f}, {X_std.max():.2f}]")
+
+    print(f"Sampling {n_samples} patches...")
     patches, centres = sample_patches_from_centres(
         X_std,
         mask,
@@ -186,24 +210,26 @@ def build_zi_dataset(
         n_samples=n_samples,
         min_valid_frac=min_valid_frac
     )
+    print(f"  Sampled {len(patches)} patches, shape: {patches.shape}")
 
     dataset = ZiPatchDataset(patches)
 
-    return dataset, centres, meta, stats, X
+    if save_patches:
+        output_path = OUTPUT_DIR / "zi_patches.npz"
+        np.savez(
+            output_path,
+            patches=patches,
+            centres=np.array(centres),
+            stats=stats
+        )
+        print(f"Saved patches to {output_path}")
+
+    return dataset, centres, meta, stats, X_std
 
 
 # ------------------
-# Script entry point (optional)
+# Entry point
 # ------------------
 if __name__ == "__main__":
-    print("Project root:", PROJECT_ROOT)
-    print("Zi directory:", ZI_DIR)
-    print("Files found:")
-    for f in ZI_DIR.glob("zi_*.tif"):
-        print(" ", f.name)
-
-    dataset, centres, meta, stats, X = build_zi_dataset()
-
-    print("Zi shape:", X.shape)
-    print("Patches:", len(dataset))
-    print("Channels:", X.shape[-1])
+    dataset, centres, meta, stats, X = prepare_zi_data()
+    print(f"\nDataset ready: {len(dataset)} patches, {dataset[0].shape[0]} channels")

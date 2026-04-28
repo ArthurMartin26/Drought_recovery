@@ -93,8 +93,8 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 # ------------------
 # Training loop
 # ------------------
-n_epochs = 10
-lambda_var = 0.1   # strength of variance regularisation
+n_epochs = 20
+lambda_var = 1e-5   # much smaller strength - variance is already in right scale
 
 for epoch in range(n_epochs):
     model.train()
@@ -110,10 +110,11 @@ for epoch in range(n_epochs):
         mask = (X_batch != 0).float()
         recon_loss = ((X_hat - X_batch) ** 2 * mask).sum() / (mask.sum() + 1e-8)
 
-        # ---- latent variance regularisation (prevents collapse) ----
+        # ---- latent variance regularisation (encourages diverse latent space) ----
         z_var = z.var(dim=0).mean()
 
-        loss = recon_loss - lambda_var * z_var
+        # Add variance (not subtract) to prevent collapse, with small coefficient
+        loss = recon_loss + lambda_var * z_var
 
         optimizer.zero_grad()
         loss.backward()
