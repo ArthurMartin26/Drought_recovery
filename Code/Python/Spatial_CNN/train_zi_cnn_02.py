@@ -66,7 +66,7 @@ class SpatialAutoencoder(nn.Module):
 def train_cnn(
     n_epochs=30,
     batch_size=64,
-    latent_dim=4,
+    latent_dim=8,
     learning_rate=1e-3,
     lambda_var=1e-5,
     save_path="trained_zi_cnn.pt"

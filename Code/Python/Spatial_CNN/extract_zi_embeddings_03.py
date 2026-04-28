@@ -11,7 +11,7 @@ import pandas as pd
 from pathlib import Path
 
 # Import from prepare script
-from prep_zi_data import prepare_zi_data
+from prepare_zi_data_01 import prepare_zi_data
 
 
 # ------------------
@@ -76,7 +76,7 @@ def extract_embeddings(
     print("Loading dataset...")
     dataset, centres, meta, stats, X = prepare_zi_data()
     C = dataset[0].shape[0]
-    latent_dim = 4
+    latent_dim = 8
 
     print(f"  Input channels: {C}")
     print(f"  Number of samples: {len(dataset)}")
