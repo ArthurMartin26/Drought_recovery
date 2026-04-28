@@ -68,6 +68,8 @@ class SpatialAutoencoder(nn.Module):
         x_hat = self.decoder(h_dec)
 
         return x_hat, z
+
+
 # ------------------
 # Training setup
 # ------------------
@@ -85,7 +87,6 @@ model = SpatialAutoencoder(
     latent_dim=4
 ).to(device)
 
-criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
 
@@ -93,6 +94,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 # Training loop
 # ------------------
 n_epochs = 10
+lambda_var = 0.1   # strength of variance regularisation
 
 for epoch in range(n_epochs):
     model.train()
@@ -102,17 +104,30 @@ for epoch in range(n_epochs):
         X_batch = X_batch.to(device)
 
         X_hat, z = model(X_batch)
-        loss = criterion(X_hat, X_batch)
+
+        # ---- masked reconstruction loss ----
+        # mask out zero-filled pixels so they don't dominate MSE
+        mask = (X_batch != 0).float()
+        recon_loss = ((X_hat - X_batch) ** 2 * mask).sum() / (mask.sum() + 1e-8)
+
+        # ---- latent variance regularisation (prevents collapse) ----
+        z_var = z.var(dim=0).mean()
+
+        loss = recon_loss - lambda_var * z_var
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-        running_loss += loss.item() * X_batch.size(0)
+        running_loss += recon_loss.item() * X_batch.size(0)
 
     epoch_loss = running_loss / len(loader.dataset)
     print(
-        f"Epoch {epoch + 1:02d} | Reconstruction loss: {epoch_loss:.5f}"
+        f"Epoch {epoch + 1:02d} | Masked recon loss: {epoch_loss:.6f}"
     )
 
+
+# ------------------
+# Save trained model
+# ------------------
 torch.save(model.state_dict(), "trained_zi_cnn.pt")

@@ -77,7 +77,7 @@ model = SpatialAutoencoder(
 ).to(device)
 
 # If you SAVED the model after training, load it here:
-# model.load_state_dict(torch.load("trained_zi_cnn.pt", map_location=device))
+model.load_state_dict(torch.load("trained_zi_cnn.pt", map_location=device))
 
 model.eval()
 
