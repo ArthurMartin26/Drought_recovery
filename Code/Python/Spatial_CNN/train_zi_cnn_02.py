@@ -8,8 +8,9 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from pathlib import Path
 
+
 # Import from prepare script
-from prepare_zi_data_01 import prepare_zi_data
+from prepare_zi_data_01 import PROJECT_ROOT, prepare_zi_data
 
 
 # ------------------
@@ -69,7 +70,9 @@ def train_cnn(
     latent_dim=8,
     learning_rate=1e-3,
     lambda_var=1e-5,
-    save_path="trained_zi_cnn.pt"
+    PROJECT_ROOT = Path(__file__).resolve().parents[3],
+save_path = PROJECT_ROOT / "Data" / "Data_Output" / "Zi" / "trained_zi_cnn.pt"
+
 ):
     """
     Train the autoencoder on Zi patches.
