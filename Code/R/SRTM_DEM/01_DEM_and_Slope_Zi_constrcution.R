@@ -120,6 +120,28 @@ plot(slope_10km,
      main = "Slope (degrees, Zi channel)",
      col  = terrain.colors(50))
 
+
+png(
+  filename = "Outputs/figures/dem_10km.png",
+  width = 1600,
+  height = 1200,
+  res = 200
+)
+plot(dem_10km, main = "Elevation (Zi channel)")
+dev.off()
+
+png(
+  filename = "Outputs/figures/slope_10km.png",
+  width = 1600,
+  height = 1200,
+  res = 200
+)
+plot(
+  slope_10km,
+  main = "Slope (degrees, Zi channel)",
+  col = terrain.colors(50)
+)
+dev.off()
 ############################################################
 # End of script
 ############################################################

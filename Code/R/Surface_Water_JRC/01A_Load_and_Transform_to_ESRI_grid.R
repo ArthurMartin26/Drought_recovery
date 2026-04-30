@@ -124,3 +124,16 @@ plot(
 )
 
 plot(dem_nga_utm)
+
+
+png(
+  filename = "Outputs/figures/sw_scaled_10km.png",
+  width = 1600,
+  height = 1200,
+  res = 200
+)
+plot(
+  sw_scaled,
+  main = "Surface Water Share (Zi channel, scaled)"
+)
+dev.off()
