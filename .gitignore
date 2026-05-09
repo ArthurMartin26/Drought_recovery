@@ -12,6 +12,8 @@ __pycache__/
 Data/ 
 Documents/
 Outputs/ 
+tools/
+
 
 # C extensions
 *.so
