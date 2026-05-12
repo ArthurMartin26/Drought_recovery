@@ -75,6 +75,20 @@ setorder(dt, cell_id, date)
 # ----------------------------
 dt[, rain3 := frollsum(rain_mm, n = k_months, align = "right", na.rm = FALSE), by = cell_id]
 
+# after computing rain3
+dt[, d1 := shift(date, 1), by = cell_id]
+dt[, d2 := shift(date, 2), by = cell_id]
+
+# gap if current month isn't exactly 1 month after previous,
+# OR previous isn't exactly 1 month after the one before it
+dt[, gap_win := (!is.na(d1) & date != (d1 %m+% months(1))) |
+     (!is.na(d2) & d1   != (d2 %m+% months(1)))]
+
+dt[gap_win == TRUE, rain3 := NA_real_]
+
+dt[, c("d1","d2","gap_win") := NULL]
+
+
 # First (k_months-1) months per cell will be NA; that's expected.
 
 # ----------------------------
@@ -97,7 +111,7 @@ dt <- merge(dt, base3, by = c("cell_id", "month"), all.x = TRUE)
 # z-score of 3-month rainfall
 dt[, z3 := (rain3 - base3_mean) / base3_sd]
 
-# ----------------------------
+# ----------------------------A
 # Step 3: Convert z3 into a drought STATE using hysteresis
 # This is the critical "shock not persistence" step:
 #   - You only ENTER when it gets bad enough (enter_thresh)

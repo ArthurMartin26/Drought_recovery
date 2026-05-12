@@ -138,7 +138,8 @@ message(sprintf("SD stabilisation: sd_floor (1st percentile of positive SDs) = %
 dt[, base3_sd_stab := base3_sd]
 
 # Tier 1: near-zero SD -> unreliable baseline -> set to NA (so z3 becomes NA)
-dt[!is.na(base3_sd_stab) & base3_sd_stab < 1e-6, base3_sd_stab := NA_real_]
+# Drop low-variance months entirely
+dt[!is.na(base3_sd) & base3_sd < 5, base3_sd_stab := NA_real_]
 
 # Tier 2: SD floor for remaining small-but-nonzero SDs
 dt[!is.na(base3_sd_stab), base3_sd_stab := pmax(base3_sd_stab, sd_floor)]
@@ -164,10 +165,11 @@ hysteresis_state <- function(z, enter = -1, exit = -0.5) {
     zi <- z[t]
     
     if (is.na(zi)) {
-      # conservative: missing info => not in drought
+      in_drought <- FALSE   
       state[t] <- FALSE
       next
     }
+    
     
     if (!in_drought) {
       if (zi <= enter) in_drought <- TRUE
@@ -347,22 +349,49 @@ val_dt <- months_out[cell_id %in% val_cells]
 print(val_dt[, .(cell_id, date, z3_trigger, drought_state, event_id)][order(cell_id, date)][1:200])
 
 # Plot z3 with drought_state shading
+## first select 2 random cells 
+library(data.table)
+
+# get one random cell
+set.seed(123)
+cell1 <- sample(unique(months_out$cell_id), 1)
+
+# pick the cell farthest away from it
+coords <- unique(months_out[, .(cell_id, lon, lat)])
+
+cell1_coords <- coords[cell_id == cell1]
+
+coords[, dist := (lon - cell1_coords$lon)^2 + (lat - cell1_coords$lat)^2]
+
+cell2 <- coords[order(-dist)][1, cell_id]
+
+val_cells <- c(cell1, cell2)
+
+print(val_cells)
+
+### now run the plot for the two cells 
+
+
+val_dt[, next_month := date %m+% months(1)]
+
 p_val <- ggplot(val_dt, aes(x = date, y = z3_trigger)) +
+  geom_rect(
+    data = val_dt[!is.na(event_id)],
+    aes(xmin = date, xmax = next_month, ymin = -Inf, ymax = Inf),
+    inherit.aes = FALSE,
+    fill = "steelblue3", alpha = 0.20
+  ) +
   geom_line(linewidth = 0.35) +
   geom_hline(yintercept = enter_thresh, linetype = "dashed", linewidth = 0.3) +
   geom_hline(yintercept = exit_thresh,  linetype = "dotted", linewidth = 0.3) +
-  geom_ribbon(aes(ymin = -Inf, ymax = Inf, fill = drought_state),
-              alpha = 0.15) +
   facet_wrap(~ cell_id, scales = "free_x", ncol = 1) +
-  labs(
-    title = "Validation cells: z3 and drought_state (shaded) with hysteresis thresholds",
-    x = NULL, y = "z3 (SPI-3 style)"
-  ) +
   theme_minimal() +
-  guides(fill = "none")
+  labs(title = "Validation cells: z3 and retained drought events (event_id shaded)",
+       x = NULL, y = "z3 (SPI-3 style)")
 
 ggsave(out_val_png, p_val, width = 10, height = 5 + 2 * n_validate_cells, dpi = 150)
 
+plot(p_val)
 # ============================================================
 # Final sanity checks (fail loudly)
 # ============================================================

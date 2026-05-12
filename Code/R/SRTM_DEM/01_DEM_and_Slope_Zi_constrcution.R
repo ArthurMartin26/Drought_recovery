@@ -45,7 +45,7 @@ plot(dem_crop, main = "DEM cropped to Nigeria")
 
 # ----------------------------
 # 4. Reproject DEM to equal-area CRS
-# (This is the only expensive step)
+# (This is the expensive step)
 # ----------------------------
 dem_ea <- project(
   dem_crop,

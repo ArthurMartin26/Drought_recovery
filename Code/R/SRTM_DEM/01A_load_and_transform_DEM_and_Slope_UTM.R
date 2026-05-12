@@ -1,6 +1,10 @@
 ############################################################
 # DEM processing: Nigeria elevation & slope (gradient)
 # Purpose: Construct time-invariant Zi covariates
+# 
+
+## We are not using UTM so this script is redundant 
+
 # Author: Arthur Martin
 ############################################################
 

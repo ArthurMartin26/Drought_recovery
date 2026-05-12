@@ -174,7 +174,6 @@ p_extent <- ggplot(ng_events, aes(x = share_cells_affected)) +
 
 
 ggsave(out_png_extent, p_extent, width = 9, height = 4, dpi = 150)
-
 # ----------------------------
 # Sanity checks
 # ----------------------------

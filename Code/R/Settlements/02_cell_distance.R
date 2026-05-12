@@ -102,3 +102,16 @@ writeRaster(
 plot(dist_market_scaled,
      main = "Distance to Market (Zi channel, scaled)")
 
+png(
+  filename = "Outputs/figures/dist_market_scaled.png",
+  width = 1600,
+  height = 1200,
+  res = 200
+)
+
+plot(
+  dist_market_scaled,
+  main = "Distance to market (Zi channel, scaled)"
+)
+
+dev.off()

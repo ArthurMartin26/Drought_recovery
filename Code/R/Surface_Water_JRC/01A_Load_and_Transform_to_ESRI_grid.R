@@ -123,7 +123,6 @@ plot(
   main = "Surface Water Share (Zi channel, scaled)"
 )
 
-plot(dem_nga_utm)
 
 
 png(
