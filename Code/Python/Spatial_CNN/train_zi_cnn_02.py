@@ -24,11 +24,11 @@ class SpatialAutoencoder(nn.Module):
         self.encoder = nn.Sequential(
             nn.Conv2d(in_channels, 32, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.AvgPool2d(2),          # 12x12 → 6x6
+            nn.AvgPool2d(2),          # pooling taking 12x12 down to 6x6
 
             nn.Conv2d(32, 64, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.AvgPool2d(2)           # 6x6 → 3x3
+            nn.AvgPool2d(2)           #pool aagoin down from 6x6  down to 3x3
         )
 
         self.fc_enc = nn.Linear(64 * 3 * 3, latent_dim)
@@ -41,8 +41,7 @@ class SpatialAutoencoder(nn.Module):
             nn.Conv2d(64, 32, kernel_size=3, padding=1),
             nn.ReLU(),
 
-            nn.Upsample(scale_factor=2),  # 6x6 → 12x12
-            nn.Conv2d(32, in_channels, kernel_size=3, padding=1)
+            nn.Upsample(scale_factor=2),  # 6x6ize=3, padding=1)
         )
 
     def forward(self, x):
